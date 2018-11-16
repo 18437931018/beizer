@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>lll</title>
+    <style>
+        canvas {
+            background: gray;
+            width: 1200;
+            height: 800px;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="mycanvas" width="1200" height="800"></canvas>
+
+    <div>
+        json名字: <input type="text" id="inputt">
+        <button id="btn">生成json</button>
+    </div>
+    <script>
+        window.onload = function () {
+
+            document.getElementById('btn')
+                .addEventListener('click', function (e) {
+                    let inputt = document.getElementById('inputt');
+                    let txt = inputt.value;
+                    if (txt === '') {
+                        alert('请输入名字')
+                    } else {
+                        let xhr = new XMLHttpRequest(); //此时readyState属性值为0
+                        // xhr.open('get', 'http://localhost?name=yang&psd=123', true) //此时readyState属性值为1
+                        // xhr.send(posArr) //readyState属性值为2
+
+                        xhr.open('post', 'http://localhost', true);
+                        //post相比get方式提交多了个这个
+                        xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                        //post发送数据
+                        xhr.send(JSON.stringify({
+                            name: txt,
+                            data: posArr
+                        }));
+
+                        xhr.onreadystatechange = function () {
+                            if (xhr.readyState == 4) {
+                                if (xhr.status == 200) {
+                                    console.log(xhr.responseText)
+                                    alert(xhr.responseText)
+                                } else {
+                                    console.log(xhr.status)
+                                }
+                            }
+                        }
+                    }
+                }, false)
+
+
+            let posArr = [];
+            const canvas = document.getElementById('mycanvas'),
+                ctx = canvas.getContext('2d')
+            canvas.addEventListener('click', function (e) {
+                var x = event.pageX
+                var y = event.pageY
+                posArr.push({
+                    x: x,
+                    y: y
+                })
+                creatCircle(x, y)
+                if (posArr.length > 2)
+                    createBezire()
+            }, false)
+
+            function creatCircle(x, y) {
+                ctx.beginPath();
+                ctx.arc(x, y, 5, 0, Math.PI * 2, true);
+                ctx.fillStyle = "red";
+                ctx.fill();
+                ctx.closePath();
+            }
+
+            function createBezire() {
+                ctx.strokeStyle = '#FA7E2A';
+                ctx.beginPath();
+                let o = posArr[0];
+                ctx.moveTo(o.x, o.y);
+                let arr = [];
+                posArr.forEach((o, i) => {
+                    if (i !== 0) {
+                        arr.push(o.x);
+                        arr.push(o.y);
+                    }
+                })
+                if (posArr.length === 3)
+                    ctx.quadraticCurveTo(...arr);
+                else if (posArr.length === 4) {
+                    ctx.bezierCurveTo(...arr);
+                } else {
+                    canvas.height = canvas.height;
+                    posArr = [];
+                }
+                ctx.stroke();
+                ctx.globalCompositeOperation = 'source-over';
+            }
+        }
+    </script>
+</body>
+
+
+</html>
